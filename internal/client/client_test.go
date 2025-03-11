@@ -1,6 +1,9 @@
 package client
 
 import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -15,5 +18,30 @@ func TestSplitLongMessage(t *testing.T) {
 
 	if msg != reconstructed {
 		t.Errorf("reconstructed message does not match the original. parts: %d\noriginal: %s\nreconstr: %s\n", len(parts), msg, reconstructed)
+	}
+}
+
+func TestSendTo(t *testing.T) {
+
+	msg := "lasdjf adsflj woq 2iuwqr 3234 2343 aslfja89 877f*&(&&( afjwqeo4r97))vaferq werqerqerdf afj fjljdsfjdalfjlkdfjlwoq4uroeqwpr-0851"
+	testToken := "test-token-mihai"
+	testPath := fmt.Sprintf("/bot%s/sendMessage", testToken)
+
+	srvr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+
+		if path != testPath {
+			t.Errorf("bad request path. expecting: %s, got: %s", testPath, path)
+		}
+		if r.Method != http.MethodPost {
+			t.Errorf("bad method. expecting: %s, got: %s", http.MethodPost, r.Method)
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}))
+	cli := &TClient{HttpClient: srvr.Client(), Token: testToken, ChatID: "my-chatid-123"}
+
+	if err := cli.sendTo(msg, srvr.URL+testPath); err != nil {
+		t.Errorf("unexpected error sending the message: %v", err)
 	}
 }
