@@ -39,9 +39,11 @@ func TestSendTo(t *testing.T) {
 
 		w.WriteHeader(http.StatusOK)
 	}))
-	cli := &TClient{HttpClient: srvr.Client(), Token: testToken, ChatID: "my-chatid-123"}
+	cli := &TClient{HttpClient: srvr.Client(), Token: testToken}
 
-	if err := cli.sendTo(msg, srvr.URL+testPath); err != nil {
+	telegramApiURL = srvr.URL
+
+	if err := cli.send(message{chatID: "my-chatid-123", txt: msg}); err != nil {
 		t.Errorf("unexpected error sending the message: %v", err)
 	}
 }
