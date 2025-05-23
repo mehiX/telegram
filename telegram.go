@@ -11,7 +11,7 @@ import (
 
 type Client interface {
 	// SendTo sends the message to chatID. if the message is too long, it will be split and sent as multiple messages
-	SendTo(msg string, chatID string)
+	SendTo(msg string, chatIDs ...string)
 	// Send sends the message to the chatID's returned by the ChatIdFn()
 	Send(msg string)
 	Errors() <-chan error

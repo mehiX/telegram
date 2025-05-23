@@ -63,7 +63,7 @@ func (c *TClient) Stop(ctx context.Context) error {
 
 	select {
 	case <-c.done:
-		slog.Info("all telegram messages sent")
+		slog.Info("all telegram messages processed")
 	case <-ctx.Done():
 		slog.Warn("some telegram messages have been discarded")
 		return ctx.Err()
@@ -78,10 +78,12 @@ func (c *TClient) Errors() <-chan error {
 
 // SendTo sends a message to the configured chat.
 // Long messages are split in chunks that are then sent individually.
-func (c *TClient) SendTo(msg string, chatID string) {
+func (c *TClient) SendTo(msg string, chatIDs ...string) {
 	parts := splitLongMessage(msg, maxMessageSize)
 	for i := range parts {
-		c.messages <- message{txt: parts[i], chatID: chatID}
+		for _, chatID := range chatIDs {
+			c.messages <- message{txt: parts[i], chatID: strings.TrimSpace(chatID)}
+		}
 	}
 }
 
